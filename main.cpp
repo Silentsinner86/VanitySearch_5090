@@ -76,16 +76,16 @@ void setTerminalRawMode(bool enable) {
 void setNonBlockingInput(bool enable) {
 	int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
 	if (enable) {
-		fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK); // Modalit‡ non bloccante
+		fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK); // Modalit√† non bloccante
 	}
 	else {
-		fcntl(STDIN_FILENO, F_SETFL, flags & ~O_NONBLOCK); // Ripristina modalit‡ bloccante
+		fcntl(STDIN_FILENO, F_SETFL, flags & ~O_NONBLOCK); // Ripristina modalit√† bloccante
 	}
 }
 
 void monitorKeypress() {
 	setTerminalRawMode(true);
-	setNonBlockingInput(true);  // Imposta stdin in modalit‡ non bloccante
+	setNonBlockingInput(true);  // Imposta stdin in modalit√† non bloccante
 
 	while (!stopMonitorKey) {
 		Timer::SleepMillis(1);
@@ -97,13 +97,13 @@ void monitorKeypress() {
 		}
 	}
 
-	setNonBlockingInput(false);  // Ripristina modalit‡ normale
+	setNonBlockingInput(false);  // Ripristina modalit√† normale
 	setTerminalRawMode(false);
 }
 #endif
 
 
-#define RELEASE "2.3"
+#define RELEASE "Silentsinner" 
 
 using namespace std;
 
