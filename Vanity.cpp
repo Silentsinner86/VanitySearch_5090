@@ -458,9 +458,13 @@ void VanitySearch::output(string addr, string pAddr, string pAddrHex, std::strin
 		break;
 	}
 
+	std::string paddedHex = pAddrHex;
+	if (paddedHex.size() < 64) {
+		paddedHex.insert(0, 64 - paddedHex.size(), '0');
+	}
 	if (f != stdout)
-		fprintf(f, "Priv (HEX): 0x%064s\n", pAddrHex.c_str());	
-	fprintf(stdout, "Priv (HEX): 0x%064s\n", pAddrHex.c_str());
+		fprintf(f, "Priv (HEX): 0x%s\n", paddedHex.c_str());
+	fprintf(stdout, "Priv (HEX): 0x%s\n", paddedHex.c_str());
 	fprintf(stdout, "\n");
 
 	if (f != stdout)
