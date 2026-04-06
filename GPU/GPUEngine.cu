@@ -267,7 +267,7 @@ GPUEngine::GPUEngine(int gpuId, uint32_t maxFound) {
     cudaGetDeviceProperties(&deviceProp, gpuId);
 
     NB_TRHEAD_PER_GROUP = ChooseThreadsPerGroup(deviceProp);  // GRID SIZE
-    nbThreadGroup = NormalizeThreadGroupCount(deviceProp, nbThreadGroup);
+    uint64_t nbThreadGroup = NormalizeThreadGroupCount(deviceProp, 0);
     g_gpuId = gpuId;
 
     // Initialise CUDA
