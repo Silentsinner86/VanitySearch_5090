@@ -635,7 +635,7 @@ int main(int argc, char* argv[]) {
 
 	}
 
-	fprintf(stdout, "VanitySearch-Bitcrack v" RELEASE "\n");
+	fprintf(stdout, "VanitySearch-Bitcrack " RELEASE "\n");
 
 	if (gridSize.size() == 0) {
 		for (int i = 0; i < gpuId.size(); i++) {
