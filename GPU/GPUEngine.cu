@@ -253,13 +253,7 @@ GPUEngine::GPUEngine(int gpuId, uint32_t maxFound) {
     }
 
     if (!randomMode) {
-        uint64_t powerOfTwo = 1;
-        while (powerOfTwo <= nbThreadGroup) {  //  GET THE CLOSEST POWER OF 2
-            powerOfTwo <<= 1;
-        }
-
-        powerOfTwo >>= 1;
-        nbThreadGroup = powerOfTwo;
+        int nbThreadGroup = deviceProp.multiProcessorCount * 192;
     }
 
 
