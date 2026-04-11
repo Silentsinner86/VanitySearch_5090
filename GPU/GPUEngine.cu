@@ -50,15 +50,6 @@ int _ConvertSMVer2Cores(int major, int minor) {
     } sSMtoCores;
 
     sSMtoCores nGpuArchCoresPerSM[] = {
-        {0x60,  64},
-        {0x61, 128},
-        {0x62, 128},
-        {0x70,  64},
-        {0x72,  64},
-        {0x75,  64},
-        {0x80,  64},
-        {0x86,  128},
-        {0x89,  128},
         {0x90,  128},
         {0xC0,  128},
         {-1, -1} };
