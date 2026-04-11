@@ -89,7 +89,7 @@ __global__ void comp_keys(address_t* sAddress, uint32_t* lookup32, uint64_t* key
     uint64_t* starty = keys + (blockIdx.x * blockDim.x) * 8 + 4 * blockDim.x;
 
 
-    uint64_t dx[4];
+    uint64_t dx[4];  
     uint64_t px[4];
     uint64_t py[4];
     uint64_t dy[4];
@@ -102,8 +102,8 @@ __global__ void comp_keys(address_t* sAddress, uint32_t* lookup32, uint64_t* key
     uint32_t h[5];
     uint64_t inverse[5];
 
-    uint64_t subp[GRP_SIZE / 2][4];
-
+    uint64_t subp[GRP_SIZE/2][4];
+    
 
     __syncthreads();
     Load256A(sx, startx);
@@ -134,7 +134,7 @@ __global__ void comp_keys(address_t* sAddress, uint32_t* lookup32, uint64_t* key
     _ModInv(inverse);
 
     __syncthreads();
-
+    
     ModNeg256(syn, sy);
     ModNeg256(sxn, sx);
 
@@ -214,7 +214,7 @@ __global__ void comp_keys(address_t* sAddress, uint32_t* lookup32, uint64_t* key
 
     ModSub256(py, _2Gnx, px);
     _ModMult(py, dy);
-    ModSub256(py, _2Gny);
+    ModSub256(py, _2Gny);               
 
     __syncthreads();
     Store256A(startx, px);
@@ -242,7 +242,7 @@ GPUEngine::GPUEngine(int gpuId, uint32_t maxFound) {
     NB_TRHEAD_PER_GROUP = 256;                                          //////////////////  GRID SIZE ////////////////
     int nbThreadGroup = deviceProp.multiProcessorCount * 192;
 
-    if (randomMode) {
+    if (!randomMode) {
         uint64_t powerOfTwo = 1;
         while (powerOfTwo <= nbThreadGroup) {  //  GET THE CLOSEST POWER OF 2
             powerOfTwo <<= 1;
@@ -252,11 +252,7 @@ GPUEngine::GPUEngine(int gpuId, uint32_t maxFound) {
         nbThreadGroup = powerOfTwo;
     }
 
-    if (!randomMode) {
-        int nbThreadGroup = deviceProp.multiProcessorCount * 192;
-    }
-
-
+    
     g_gpuId = gpuId;
 
     // Initialise CUDA
@@ -290,18 +286,18 @@ GPUEngine::GPUEngine(int gpuId, uint32_t maxFound) {
         return;
     }
 
-
+   
 
     this->nbThread = nbThreadGroup * NB_TRHEAD_PER_GROUP;//////////////////////////////////////////////////////////////////
     this->maxFound = maxFound;
     this->outputSize = (maxFound * ITEM_SIZE + 4);
 
     char tmp[512];
-    sprintf(tmp, "GPU #%d %s (%dx%d cores) Grid(%dx%d)",
-        gpuId, deviceProp.name, deviceProp.multiProcessorCount,
-        _ConvertSMVer2Cores(deviceProp.major, deviceProp.minor),
-        nbThread / NB_TRHEAD_PER_GROUP,
-        NB_TRHEAD_PER_GROUP);
+    sprintf(tmp,"GPU #%d %s (%dx%d cores) Grid(%dx%d)",
+    gpuId,deviceProp.name,deviceProp.multiProcessorCount,
+    _ConvertSMVer2Cores(deviceProp.major, deviceProp.minor),
+    nbThread / NB_TRHEAD_PER_GROUP,
+    NB_TRHEAD_PER_GROUP);
 
     deviceName = std::string(tmp);
 
@@ -394,7 +390,7 @@ void GPUEngine::PrintCudaInfo() {
     cudaError_t error_id = cudaGetDeviceCount(&deviceCount);
 
 
-    for (int i = 0; i < deviceCount; i++) {
+    for (int i = 0;i < deviceCount;i++) {
 
         cudaDeviceProp deviceProp;
         cudaGetDeviceProperties(&deviceProp, i);
@@ -426,7 +422,7 @@ void GPUEngine::SetSearchType(int searchType) {
 void GPUEngine::SetAddress(std::vector<address_t> addresses) {
 
     memset(inputAddressPinned, 0, _64K * 2);
-    for (int i = 0; i < (int)addresses.size(); i++)
+    for (int i = 0;i < (int)addresses.size();i++)
         inputAddressPinned[addresses[i]] = 1;
 
     // Fill device memory
@@ -532,7 +528,7 @@ int GPUEngine::GetGroupSize() {
 
 bool GPUEngine::callKernel() {
 
-
+   
     // Reset nbFound
     cudaMemset(outputBuffer, 0, 4);
 
@@ -635,50 +631,49 @@ bool GPUEngine::SetRandomJump(Point p) {
 bool GPUEngine::Launch(std::vector<ITEM>& addressFound, bool spinWait) {
 
     addressFound.clear();
-
+    
 
     // Get the result
 
 
-    if (spinWait) {
+    if(spinWait) {
 
-        cudaMemcpy(outputBufferPinned, outputBuffer, outputSize, cudaMemcpyDeviceToHost);
+      cudaMemcpy(outputBufferPinned, outputBuffer, outputSize, cudaMemcpyDeviceToHost);
 
-    }
-    else {
+    } else {
 
-        // Use cudaMemcpyAsync to avoid default spin wait of cudaMemcpy wich takes 100% CPU
-        cudaEvent_t evt;
-        cudaEventCreate(&evt);
+      // Use cudaMemcpyAsync to avoid default spin wait of cudaMemcpy wich takes 100% CPU
+      cudaEvent_t evt;
+      cudaEventCreate(&evt);
 
-        //cudaMemcpy(outputBufferPinned, outputBuffer, 4, cudaMemcpyDeviceToHost);
-        cudaMemcpyAsync(outputBufferPinned, outputBuffer, 4, cudaMemcpyDeviceToHost, 0);
+      //cudaMemcpy(outputBufferPinned, outputBuffer, 4, cudaMemcpyDeviceToHost);
+      cudaMemcpyAsync(outputBufferPinned, outputBuffer, 4, cudaMemcpyDeviceToHost, 0);
 
-        cudaEventRecord(evt, 0);
-        while (cudaEventQuery(evt) == cudaErrorNotReady) {
-            // Sleep 1 ms to free the CPU
-            Timer::SleepMillis(1);
-        }
-        cudaEventDestroy(evt);
+      cudaEventRecord(evt, 0);
+      while (cudaEventQuery(evt) == cudaErrorNotReady) {
+        // Sleep 1 ms to free the CPU
+        Timer::SleepMillis(1);
+      }
+      cudaEventDestroy(evt);
 
     }
 
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess) {
-        printf("GPUEngine: Launch: %s\n", cudaGetErrorString(err));
-        return false;
+      printf("GPUEngine: Launch: %s\n", cudaGetErrorString(err));
+      return false;
     }
 
     // Look for address found
     uint32_t nbFound = outputBufferPinned[0];
 
     if (nbFound > maxFound) {
-        // address has been lost
-        if (!lostWarning) {
-            printf("\nWarning, %d items lost\nHint: Search with less addresses/prefixes or increase maxFound (-m) using multiple of 65536\n", (nbFound - maxFound));
-            lostWarning = true;
-        }
-        nbFound = maxFound;
+      // address has been lost
+      if (!lostWarning) {
+        printf("\nWarning, %d items lost\nHint: Search with less addresses/prefixes or increase maxFound (-m) using multiple of 65536\n", (nbFound - maxFound));
+        lostWarning = true;
+      }
+      nbFound = maxFound;
     }
 
     // When can perform a standard copy, the kernel is eneded
