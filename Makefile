@@ -1,8 +1,3 @@
-#---------------------------------------------------------------------
-# Makefile for vanitysearch
-#
-# Author : Jean-Luc PONS
-
 SRC = Base58.cpp IntGroup.cpp main.cpp Random.cpp \
       Timer.cpp Int.cpp IntMod.cpp Point.cpp SECP256K1.cpp \
       Vanity.cpp GPU/GPUGenerate.cpp hash/ripemd160.cpp \
@@ -65,4 +60,3 @@ clean:
 	@rm -f obj/*.o
 	@rm -f obj/GPU/*.o
 	@rm -f obj/hash/*.o
-
