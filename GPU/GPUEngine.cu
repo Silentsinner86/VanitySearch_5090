@@ -231,18 +231,7 @@ GPUEngine::GPUEngine(int gpuId, uint32_t maxFound) {
     cudaGetDeviceProperties(&deviceProp, gpuId);
 
     NB_TRHEAD_PER_GROUP = 256;                                          //////////////////  GRID SIZE ////////////////
-    int nbThreadGroup = deviceProp.multiProcessorCount * 192;
-
-    if (!randomMode) {
-        uint64_t powerOfTwo = 1;
-        while (powerOfTwo <= nbThreadGroup) {  //  GET THE CLOSEST POWER OF 2
-            powerOfTwo <<= 1;
-        }
-
-        powerOfTwo >>= 1;
-        nbThreadGroup = powerOfTwo;
-    }
-
+    int nbThreadGroup = deviceProp.multiProcessorCount * 128;
     
     g_gpuId = gpuId;
 
